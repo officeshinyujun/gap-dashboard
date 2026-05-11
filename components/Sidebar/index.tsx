@@ -5,7 +5,7 @@ import { HStack } from '../general/HStack';
 import Typo from '../general/Typo';
 import { SPACING } from '../../constants/spacing';
 import s from './style.module.scss';
-import { LayoutDashboard, FlaskConical, List, BookOpen, Settings, Users, BarChart2, Zap, LogOut } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, List, BookOpen, Settings, Users, BarChart2, Zap, LogOut, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -58,6 +58,12 @@ export function Sidebar() {
           <SidebarItem icon={List} label="시험 목록" href="/exam-list" isActive={isActive('/exam-list')} />
           <SidebarItem icon={BookOpen} label="시험지 뷰어" href="/exam-viewer" isActive={isActive('/exam-viewer')} />
           <SidebarItem icon={Settings} label="QuestionStem 갤러리" href="/questionstem" isActive={isActive('/questionstem')} />
+        </VStack>
+
+        {/* 채팅 */}
+        <VStack gap={SPACING.s8} style={{ padding: SPACING.s8 }}>
+          <Typo.MD size={12} color="secondary">채팅</Typo.MD>
+          <SidebarItem icon={MessageSquare} label="채팅 테스트" href="/chat" isActive={isActive('/chat')} />
         </VStack>
 
         {/* 어드민 */}
