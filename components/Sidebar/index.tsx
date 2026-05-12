@@ -5,7 +5,7 @@ import { HStack } from '../general/HStack';
 import Typo from '../general/Typo';
 import { SPACING } from '../../constants/spacing';
 import s from './style.module.scss';
-import { LayoutDashboard, FlaskConical, List, BookOpen, Settings, Users, BarChart2, Zap, LogOut, MessageSquare, BookMarked } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, List, BookOpen, Settings, Users, BarChart2, Zap, LogOut, MessageSquare, BookMarked, Database } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -59,6 +59,7 @@ export function Sidebar() {
           <SidebarItem icon={BookOpen} label="시험지 뷰어" href="/exam-viewer" isActive={isActive('/exam-viewer')} />
           <SidebarItem icon={Settings} label="QuestionStem 갤러리" href="/questionstem" isActive={isActive('/questionstem')} />
           <SidebarItem icon={BookMarked} label="Study Quiz 테스트" href="/study-quiz" isActive={isActive('/study-quiz')} />
+          <SidebarItem icon={Database} label="RAG 임베딩 관리" href="/rag-embedding" isActive={isActive('/rag-embedding')} />
         </VStack>
 
         {/* 채팅 */}
