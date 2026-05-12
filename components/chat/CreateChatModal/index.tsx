@@ -149,7 +149,7 @@ export function CreateChatModal({ isOpen, onClose, onCreated }: CreateChatModalP
               </HStack>
             </VStack>
 
-            {error && <Typo.MD size={13} color="secondary" style={{ color: '#DA7F7F' }}>{error}</Typo.MD>}
+            {error && <Typo.MD size={12} color="secondary" style={{ color: '#DA7F7F' }}>{error}</Typo.MD>}
           </VStack>
 
           {/* 버튼 */}

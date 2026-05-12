@@ -100,6 +100,51 @@
   border-left: 3px solid $text-wrong;
 }
 
+.infoBox {
+  padding: $spacing-10 $spacing-12;
+  background-color: $background-secondary;
+  border: 1px solid $border-primary;
+  border-left: 3px solid $border-primary;
+}
+
+.tabBar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid $border-primary;
+}
+
+.tab {
+  padding: $spacing-8 $spacing-16;
+  font-size: 12px;
+  font-weight: $medium;
+  font-family: 'Noto Sans KR', 'Noto Sans', sans-serif;
+  color: $text-secondary;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+
+  &:hover { color: $text-primary; }
+  &.tabActive {
+    color: $brand-primary;
+    border-bottom-color: $brand-primary;
+    font-weight: $semi-bold;
+  }
+}
+
+.sourceBadge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: $semi-bold;
+  padding: 2px $spacing-8;
+  font-family: 'Courier New', monospace;
+
+  &[data-source='chat'] { background-color: $brand-secondary; color: $brand-primary; }
+  &[data-source='exam_step1'] { background-color: $background-third; color: $text-secondary; }
+  &[data-source='exam_step2'] { background-color: $background-third; color: $text-secondary; }
+}
+
 .refreshBtn {
   padding: $spacing-8 $spacing-16;
   font-size: 12px;

@@ -76,11 +76,11 @@ export default function ChatPage() {
         <div className={s.sessionList}>
           {loading ? (
             <div className={s.empty}>
-              <Typo.MD size={13} color="secondary">불러오는 중...</Typo.MD>
+              <Typo.MD size={12} color="secondary">불러오는 중...</Typo.MD>
             </div>
           ) : sessions.length === 0 ? (
             <div className={s.empty}>
-              <Typo.MD size={13} color="secondary">세션이 없습니다.</Typo.MD>
+              <Typo.MD size={12} color="secondary">세션이 없습니다.</Typo.MD>
               <Typo.MD size={12} color="secondary">+ 버튼으로 새 채팅을 시작하세요.</Typo.MD>
             </div>
           ) : (
@@ -94,10 +94,10 @@ export default function ChatPage() {
                   <HStack align="center" gap={SPACING.s8} style={{ flex: 1, minWidth: 0 }}>
                     <MessageSquare size={14} color={selectedId === session.id ? '#3E78F7' : '#5C6370'} />
                     <VStack gap={SPACING.s4} style={{ flex: 1, minWidth: 0 }}>
-                      <Typo.MD size={13} color={selectedId === session.id ? 'primary' : 'primary'} style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <Typo.MD size={12} color={selectedId === session.id ? 'primary' : 'primary'} style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {session.title}
                       </Typo.MD>
-                      <Typo.MD size={11} color="secondary">
+                      <Typo.MD size={10} color="secondary">
                         {session.subject?.title ?? ''}{session.startUnit ? ` · ${session.startUnit}~${session.endUnit}단원` : ''}
                       </Typo.MD>
                     </VStack>

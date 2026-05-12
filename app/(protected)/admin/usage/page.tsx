@@ -9,29 +9,67 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getAccessToken } from '@/lib/auth';
 import s from './page.module.scss';
 
-const API_BASE = 'http://localhost:3001';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:3001';
 
-interface OpenAIUsage {
-  available: boolean;
-  error?: string;
-  data?: {
-    data: {
-      aggregation_timestamp: number;
-      n_requests: number;
-      operation: string;
-      snapshot_id: string;
-      n_context_tokens_total: number;
-      n_generated_tokens_total: number;
-    }[];
-  };
+// ── 타입 ──────────────────────────────────────────────────────
+
+interface DbRow {
+  date: string;
+  source: 'chat' | 'exam_step1' | 'exam_step2';
+  model: string;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  nRequests: number;
 }
+
+interface OpenAIRow {
+  date: string;
+  model: string;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  nRequests: number;
+}
+
+interface UsageResponse {
+  available: boolean;
+  startDate: string;
+  endDate: string;
+  db: DbRow[];
+  openai: OpenAIRow[] | null;
+  openaiError: string | null;
+}
+
+// ── 헬퍼 ──────────────────────────────────────────────────────
+
+const SOURCE_LABEL: Record<string, string> = {
+  chat: '채팅',
+  exam_step1: '시험생성 Step1',
+  exam_step2: '시험생성 Step2',
+};
+
+function sumRows(rows: { promptTokens: number; completionTokens: number; totalTokens: number; nRequests: number }[]) {
+  return rows.reduce(
+    (acc, r) => ({
+      promptTokens: acc.promptTokens + r.promptTokens,
+      completionTokens: acc.completionTokens + r.completionTokens,
+      totalTokens: acc.totalTokens + r.totalTokens,
+      nRequests: acc.nRequests + r.nRequests,
+    }),
+    { promptTokens: 0, completionTokens: 0, totalTokens: 0, nRequests: 0 },
+  );
+}
+
+// ── 컴포넌트 ──────────────────────────────────────────────────
 
 export default function AdminUsagePage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
-  const [usage, setUsage] = useState<OpenAIUsage | null>(null);
+  const [usage, setUsage] = useState<UsageResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<'db' | 'openai'>('db');
 
   const fetchUsage = useCallback(async () => {
     setLoading(true);
@@ -63,83 +101,225 @@ export default function AdminUsagePage() {
     </VStack>
   );
 
-  const rows = usage?.data?.data ?? [];
-  const totalContext = rows.reduce((a, d) => a + (d.n_context_tokens_total ?? 0), 0);
-  const totalGenerated = rows.reduce((a, d) => a + (d.n_generated_tokens_total ?? 0), 0);
-  const totalRequests = rows.reduce((a, d) => a + (d.n_requests ?? 0), 0);
+  const dbRows = usage?.db ?? [];
+  const openaiRows = usage?.openai ?? [];
+
+  const dbTotal = sumRows(dbRows);
+  const openaiTotal = sumRows(openaiRows);
+
+  // 날짜별 집계 (DB)
+  const dbByDate = Object.entries(
+    dbRows.reduce<Record<string, typeof dbTotal>>((acc, r) => {
+      if (!acc[r.date]) acc[r.date] = { promptTokens: 0, completionTokens: 0, totalTokens: 0, nRequests: 0 };
+      acc[r.date].promptTokens += r.promptTokens;
+      acc[r.date].completionTokens += r.completionTokens;
+      acc[r.date].totalTokens += r.totalTokens;
+      acc[r.date].nRequests += r.nRequests;
+      return acc;
+    }, {}),
+  ).sort(([a], [b]) => b.localeCompare(a));
 
   return (
     <VStack gap={20} fullWidth className={s.page}>
+      {/* 헤더 */}
       <HStack gap={0} align="center" justify="between" fullWidth>
         <VStack gap={4}>
           <Typo.BD size={20} color="primary">API 사용량</Typo.BD>
-          <Typo.TH size={12} color="secondary">OpenAI API 오늘 사용량</Typo.TH>
+          <Typo.TH size={12} color="secondary">
+            {usage ? `${usage.startDate} ~ ${usage.endDate} (최근 7일)` : 'OpenAI API 사용량'}
+          </Typo.TH>
         </VStack>
         <button className={s.refreshBtn} onClick={fetchUsage}>새로고침</button>
       </HStack>
 
-      {error && <div className={s.errorBox}><Typo.MD size={12} color="wrong">{error}</Typo.MD></div>}
-
-      {usage?.available === false ? (
+      {error && (
         <div className={s.errorBox}>
-          <Typo.TH size={12} color="secondary">{usage.error ?? 'Usage API를 사용할 수 없습니다.'}</Typo.TH>
+          <Typo.MD size={12} color="wrong">{error}</Typo.MD>
         </div>
-      ) : (
-        <VStack gap={20} fullWidth>
-          {/* 요약 카드 */}
-          <HStack gap={12} fullWidth>
-            <div className={s.summaryCard}>
-              <Typo.TH size={12} color="secondary">총 요청 수</Typo.TH>
-              <Typo.BD size={24} color="primary">{totalRequests.toLocaleString()}</Typo.BD>
-            </div>
-            <div className={s.summaryCard}>
-              <Typo.TH size={12} color="secondary">입력 토큰</Typo.TH>
-              <Typo.BD size={24} color="primary">{totalContext.toLocaleString()}</Typo.BD>
-            </div>
-            <div className={s.summaryCard}>
-              <Typo.TH size={12} color="secondary">출력 토큰</Typo.TH>
-              <Typo.BD size={24} color="primary">{totalGenerated.toLocaleString()}</Typo.BD>
-            </div>
-            <div className={s.summaryCard}>
-              <Typo.TH size={12} color="secondary">총 토큰</Typo.TH>
-              <Typo.BD size={24} color="primary">{(totalContext + totalGenerated).toLocaleString()}</Typo.BD>
-            </div>
-          </HStack>
-
-          {/* 상세 테이블 */}
-          {rows.length > 0 && (
-            <VStack gap={12} fullWidth>
-              <Typo.SM size={14} color="primary">모델별 상세</Typo.SM>
-              <div className={s.tableWrapper}>
-                <table className={s.table}>
-                  <thead>
-                    <tr>
-                      <th className={s.th}>모델</th>
-                      <th className={s.th}>요청 수</th>
-                      <th className={s.th}>입력 토큰</th>
-                      <th className={s.th}>출력 토큰</th>
-                      <th className={s.th}>합계</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((d, i) => (
-                      <tr key={i}>
-                        <td className={s.td}>{d.snapshot_id}</td>
-                        <td className={s.td}>{d.n_requests.toLocaleString()}</td>
-                        <td className={s.td}>{d.n_context_tokens_total.toLocaleString()}</td>
-                        <td className={s.td}>{d.n_generated_tokens_total.toLocaleString()}</td>
-                        <td className={s.td}>
-                          {(d.n_context_tokens_total + d.n_generated_tokens_total).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </VStack>
-          )}
-        </VStack>
       )}
+
+      {/* 요약 카드 */}
+      <HStack gap={12} fullWidth>
+        <div className={s.summaryCard}>
+          <Typo.TH size={12} color="secondary">총 요청 수 (DB)</Typo.TH>
+          <Typo.BD size={24} color="primary">{dbTotal.nRequests.toLocaleString()}</Typo.BD>
+        </div>
+        <div className={s.summaryCard}>
+          <Typo.TH size={12} color="secondary">입력 토큰 (DB)</Typo.TH>
+          <Typo.BD size={24} color="primary">{dbTotal.promptTokens.toLocaleString()}</Typo.BD>
+        </div>
+        <div className={s.summaryCard}>
+          <Typo.TH size={12} color="secondary">출력 토큰 (DB)</Typo.TH>
+          <Typo.BD size={24} color="primary">{dbTotal.completionTokens.toLocaleString()}</Typo.BD>
+        </div>
+        <div className={s.summaryCard}>
+          <Typo.TH size={12} color="secondary">총 토큰 (DB)</Typo.TH>
+          <Typo.BD size={24} color="primary">{dbTotal.totalTokens.toLocaleString()}</Typo.BD>
+        </div>
+      </HStack>
+
+      {/* 탭 */}
+      <VStack gap={0} fullWidth>
+        <div className={s.tabBar}>
+          <button
+            className={`${s.tab} ${tab === 'db' ? s.tabActive : ''}`}
+            onClick={() => setTab('db')}
+          >
+            DB 기반 추적
+          </button>
+          <button
+            className={`${s.tab} ${tab === 'openai' ? s.tabActive : ''}`}
+            onClick={() => setTab('openai')}
+          >
+            OpenAI API
+          </button>
+        </div>
+
+        {/* DB 탭 */}
+        {tab === 'db' && (
+          <VStack gap={20} fullWidth style={{ paddingTop: 16 }}>
+            {dbRows.length === 0 ? (
+              <div className={s.infoBox}>
+                <Typo.TH size={12} color="secondary">아직 기록된 사용량이 없습니다. API 호출 후 다시 확인해주세요.</Typo.TH>
+              </div>
+            ) : (
+              <>
+                {/* 날짜별 요약 */}
+                <VStack gap={8} fullWidth>
+                  <Typo.SM size={14} color="primary">날짜별 요약</Typo.SM>
+                  <div className={s.tableWrapper}>
+                    <table className={s.table}>
+                      <thead>
+                        <tr>
+                          <th className={s.th}>날짜</th>
+                          <th className={s.th}>요청 수</th>
+                          <th className={s.th}>입력 토큰</th>
+                          <th className={s.th}>출력 토큰</th>
+                          <th className={s.th}>합계</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dbByDate.map(([date, totals]) => (
+                          <tr key={date}>
+                            <td className={s.tdMeta}>{date}</td>
+                            <td className={s.td}>{totals.nRequests.toLocaleString()}</td>
+                            <td className={s.td}>{totals.promptTokens.toLocaleString()}</td>
+                            <td className={s.td}>{totals.completionTokens.toLocaleString()}</td>
+                            <td className={s.td}>{totals.totalTokens.toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </VStack>
+
+                {/* 소스별 상세 */}
+                <VStack gap={8} fullWidth>
+                  <Typo.SM size={14} color="primary">소스별 상세</Typo.SM>
+                  <div className={s.tableWrapper}>
+                    <table className={s.table}>
+                      <thead>
+                        <tr>
+                          <th className={s.th}>날짜</th>
+                          <th className={s.th}>소스</th>
+                          <th className={s.th}>모델</th>
+                          <th className={s.th}>요청 수</th>
+                          <th className={s.th}>입력 토큰</th>
+                          <th className={s.th}>출력 토큰</th>
+                          <th className={s.th}>합계</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dbRows.map((r, i) => (
+                          <tr key={i}>
+                            <td className={s.tdMeta}>{r.date}</td>
+                            <td className={s.td}>
+                              <span className={s.sourceBadge} data-source={r.source}>
+                                {SOURCE_LABEL[r.source] ?? r.source}
+                              </span>
+                            </td>
+                            <td className={s.tdMeta}>{r.model}</td>
+                            <td className={s.td}>{r.nRequests.toLocaleString()}</td>
+                            <td className={s.td}>{r.promptTokens.toLocaleString()}</td>
+                            <td className={s.td}>{r.completionTokens.toLocaleString()}</td>
+                            <td className={s.td}>{r.totalTokens.toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </VStack>
+              </>
+            )}
+          </VStack>
+        )}
+
+        {/* OpenAI API 탭 */}
+        {tab === 'openai' && (
+          <VStack gap={12} fullWidth style={{ paddingTop: 16 }}>
+            {usage?.openaiError && (
+              <div className={s.infoBox}>
+                <Typo.TH size={12} color="secondary">OpenAI API: {usage.openaiError}</Typo.TH>
+              </div>
+            )}
+            {openaiRows.length === 0 && !usage?.openaiError && (
+              <div className={s.infoBox}>
+                <Typo.TH size={12} color="secondary">OpenAI API에서 반환된 데이터가 없습니다.</Typo.TH>
+              </div>
+            )}
+            {openaiRows.length > 0 && (
+              <>
+                {/* OpenAI 요약 카드 */}
+                <HStack gap={12} fullWidth>
+                  <div className={s.summaryCard}>
+                    <Typo.TH size={12} color="secondary">총 요청 수</Typo.TH>
+                    <Typo.BD size={24} color="primary">{openaiTotal.nRequests.toLocaleString()}</Typo.BD>
+                  </div>
+                  <div className={s.summaryCard}>
+                    <Typo.TH size={12} color="secondary">입력 토큰</Typo.TH>
+                    <Typo.BD size={24} color="primary">{openaiTotal.promptTokens.toLocaleString()}</Typo.BD>
+                  </div>
+                  <div className={s.summaryCard}>
+                    <Typo.TH size={12} color="secondary">출력 토큰</Typo.TH>
+                    <Typo.BD size={24} color="primary">{openaiTotal.completionTokens.toLocaleString()}</Typo.BD>
+                  </div>
+                  <div className={s.summaryCard}>
+                    <Typo.TH size={12} color="secondary">총 토큰</Typo.TH>
+                    <Typo.BD size={24} color="primary">{openaiTotal.totalTokens.toLocaleString()}</Typo.BD>
+                  </div>
+                </HStack>
+
+                <div className={s.tableWrapper}>
+                  <table className={s.table}>
+                    <thead>
+                      <tr>
+                        <th className={s.th}>날짜</th>
+                        <th className={s.th}>모델</th>
+                        <th className={s.th}>요청 수</th>
+                        <th className={s.th}>입력 토큰</th>
+                        <th className={s.th}>출력 토큰</th>
+                        <th className={s.th}>합계</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {openaiRows.map((r, i) => (
+                        <tr key={i}>
+                          <td className={s.tdMeta}>{r.date}</td>
+                          <td className={s.tdMeta}>{r.model}</td>
+                          <td className={s.td}>{r.nRequests.toLocaleString()}</td>
+                          <td className={s.td}>{r.promptTokens.toLocaleString()}</td>
+                          <td className={s.td}>{r.completionTokens.toLocaleString()}</td>
+                          <td className={s.td}>{r.totalTokens.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </VStack>
+        )}
+      </VStack>
     </VStack>
   );
 }
