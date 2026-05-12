@@ -54,6 +54,25 @@
   &.level3 {
     background: $text-strong;
   }
+
+  &.level4 {
+    background: #7C3AED;
+  }
+}
+
+.progressBarWrap {
+  width: 200px;
+  height: 4px;
+  background: $background-third;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: $brand-primary;
+  border-radius: 2px;
+  transition: width 0.3s ease;
 }
 
 .divider {

@@ -24,14 +24,25 @@ import s from './index.module.scss';
 export interface QuestionRendererProps {
   question: ExamQuestion;
   questionNumber: number;
+  onSelect?: (optionNumber: number) => void;
+  selectedOption?: number | null;
 }
 
 export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   question,
   questionNumber,
+  onSelect,
+  selectedOption: externalSelected,
 }) => {
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [internalSelected, setInternalSelected] = useState<number | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
+
+  const selectedOption = externalSelected !== undefined ? externalSelected : internalSelected;
+
+  function handleSelect(num: number) {
+    if (externalSelected === undefined) setInternalSelected(num);
+    onSelect?.(num);
+  }
 
   const { metadata, render_ready } = question;
   const { question_stem, stimulus_data, options, options_list } = render_ready;
@@ -146,7 +157,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
             <button
               key={num}
               className={`${s.optionRow} ${selectedOption === num ? s.optionSelected : ''}`}
-              onClick={() => setSelectedOption(num)}
+              onClick={() => handleSelect(num)}
             >
               <HStack gap={10} align="center">
                 <SelectionChip

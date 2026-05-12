@@ -5,19 +5,14 @@
   box-sizing: border-box;
 }
 
-.section {
-  flex: 1;
-  min-width: 0;
+.userList {
+  width: 380px;
+  flex-shrink: 0;
 }
 
-.summaryCard {
+.detailPanel {
   flex: 1;
-  padding: $spacing-16 $spacing-20;
-  background-color: $background-primary;
-  border: 1px solid $border-primary;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-6;
+  min-width: 0;
 }
 
 .tableWrapper {
@@ -42,7 +37,6 @@
   text-align: left;
   white-space: nowrap;
   font-size: 11px;
-  letter-spacing: 0.03em;
 }
 
 .td {
@@ -50,6 +44,7 @@
   border-bottom: 1px solid $border-primary;
   color: $text-primary;
   font-size: 12px;
+  vertical-align: middle;
 }
 
 .tdMeta {
@@ -58,39 +53,59 @@
   color: $text-secondary;
   font-size: 11px;
   white-space: nowrap;
+  vertical-align: middle;
 }
 
-.badgeAdmin {
-  display: inline-block;
-  font-size: 10px;
-  font-weight: $semi-bold;
-  padding: 2px $spacing-8;
-  background-color: $text-primary;
-  color: $background-primary;
-  font-family: 'Courier New', monospace;
+.row {
+  cursor: pointer;
+  transition: background-color 0.1s;
+  &:hover { background-color: $background-secondary; }
 }
 
-.badgeUser {
-  display: inline-block;
-  font-size: 10px;
-  font-weight: $semi-bold;
-  padding: 2px $spacing-8;
-  background-color: $background-third;
+.rowActive {
+  background-color: $brand-secondary;
+  &:hover { background-color: $brand-secondary; }
+}
+
+.userName {
+  font-size: 13px;
+  font-weight: $medium;
+  color: $text-primary;
+}
+
+.userEmail {
+  font-size: 11px;
   color: $text-secondary;
-  font-family: 'Courier New', monospace;
 }
 
-.diffBadge {
-  display: inline-block;
-  font-size: 10px;
+.progressBadge {
+  font-size: 12px;
   font-weight: $semi-bold;
-  padding: 2px $spacing-8;
-  font-family: 'Courier New', monospace;
+  color: $brand-primary;
+}
 
-  &[data-level='LOW']  { background-color: $background-third; color: $text-secondary; }
-  &[data-level='MIDDLE'] { background-color: $brand-secondary; color: $brand-primary; }
-  &[data-level='HIGH'] { background-color: $text-primary; color: $background-primary; }
-  &[data-level='INTERGRATE'] { background-color: $text-wrong; color: $background-primary; }
+.complete {
+  color: $text-correct;
+  font-weight: $semi-bold;
+}
+
+.inProgress {
+  color: $brand-primary;
+}
+
+.resetBtn {
+  padding: $spacing-4 $spacing-8;
+  font-size: 11px;
+  font-weight: $semi-bold;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: $text-wrong;
+  border: 1px solid $text-wrong;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  &:hover:not(:disabled) { background: rgba(218, 127, 127, 0.1); }
+  &:disabled { opacity: 0.3; cursor: not-allowed; }
 }
 
 .errorBox {
@@ -104,13 +119,11 @@
   padding: $spacing-8 $spacing-16;
   font-size: 12px;
   font-weight: $medium;
-  font-family: 'Noto Sans KR', 'Noto Sans', sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
   color: $brand-primary;
   background-color: $background-primary;
   border: 1px solid $brand-primary;
   cursor: pointer;
-  transition: background-color 0.1s;
-
   &:hover { background-color: $brand-secondary; }
 }
 
@@ -123,37 +136,7 @@
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.actionBtn {
-  padding: $spacing-4 $spacing-10;
-  font-size: 11px;
-  font-weight: $semi-bold;
-  font-family: 'Noto Sans KR', sans-serif;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-  border: 1px solid;
-
-  &:disabled { opacity: 0.4; cursor: not-allowed; }
-}
-
-.btnRole {
-  color: $brand-primary;
-  border-color: $brand-primary;
-  background: transparent;
-  &:hover:not(:disabled) { background: $brand-secondary; }
-}
-
-.btnDelete {
-  color: $text-wrong;
-  border-color: $text-wrong;
-  background: transparent;
-  &:hover:not(:disabled) { background: rgba(218, 127, 127, 0.1); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .confirmOverlay {
   position: fixed;
@@ -193,7 +176,7 @@
   &:hover { background: $background-third; }
 }
 
-.btnConfirmDelete {
+.btnConfirmReset {
   padding: $spacing-8 $spacing-16;
   font-size: 13px;
   font-family: 'Noto Sans KR', sans-serif;

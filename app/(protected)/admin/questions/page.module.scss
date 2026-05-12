@@ -116,6 +116,190 @@
   &:hover { background-color: $brand-secondary; }
 }
 
+.deleteBtn {
+  padding: $spacing-4 $spacing-10;
+  font-size: 11px;
+  font-weight: $semi-bold;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: $text-wrong;
+  background: transparent;
+  border: 1px solid $text-wrong;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+
+  &:hover { background: rgba(218, 127, 127, 0.1); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+.confirmOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.confirmModal {
+  background: $background-primary;
+  border: 1px solid $border-primary;
+  border-radius: 12px;
+  padding: $spacing-24;
+  width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-16;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: $spacing-8;
+  justify-content: flex-end;
+}
+
+.btnCancel {
+  padding: $spacing-8 $spacing-16;
+  font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+  background: $background-secondary;
+  border: 1px solid $border-primary;
+  border-radius: 6px;
+  cursor: pointer;
+  &:hover { background: $background-third; }
+}
+
+.btnDelete {
+  padding: $spacing-8 $spacing-16;
+  font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+  background: $text-wrong;
+  color: $background-primary;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  &:hover { opacity: 0.88; }
+}
+.createBtn {
+  padding: $spacing-8 $spacing-16;
+  font-size: 12px;
+  font-weight: $semi-bold;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: $background-primary;
+  background-color: $brand-primary;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  &:hover { opacity: 0.88; }
+}
+
+.createModal {
+  background: $background-primary;
+  border: 1px solid $border-primary;
+  border-radius: 12px;
+  padding: $spacing-24;
+  width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.select {
+  width: 100%;
+  height: 36px;
+  padding: 0 $spacing-10;
+  border: 1px solid $border-primary;
+  border-radius: 6px;
+  background: $background-primary;
+  color: $text-primary;
+  font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+  outline: none;
+  &:focus { border-color: $brand-primary; }
+}
+
+.selectSmall {
+  height: 36px;
+  padding: 0 $spacing-10;
+  border: 1px solid $border-primary;
+  border-radius: 6px;
+  background: $background-primary;
+  color: $text-primary;
+  font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+  outline: none;
+  &:focus { border-color: $brand-primary; }
+}
+
+.input {
+  width: 100%;
+  height: 36px;
+  padding: 0 $spacing-10;
+  border: 1px solid $border-primary;
+  border-radius: 6px;
+  background: $background-primary;
+  color: $text-primary;
+  font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+  outline: none;
+  &:focus { border-color: $brand-primary; }
+}
+
+.textarea {
+  width: 100%;
+  padding: $spacing-8 $spacing-10;
+  border: 1px solid $border-primary;
+  border-radius: 6px;
+  background: $background-primary;
+  color: $text-primary;
+  font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+  outline: none;
+  resize: vertical;
+  &:focus { border-color: $brand-primary; }
+}
+
+.btnCreate {
+  padding: $spacing-8 $spacing-20;
+  font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+  background: $brand-primary;
+  color: $background-primary;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  &:hover { opacity: 0.88; }
+}
+
+.btnDelete2 {
+  padding: $spacing-8 $spacing-16;
+  font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+  background: $text-wrong;
+  color: $background-primary;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  &:hover { opacity: 0.88; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+.progressBarWrap {
+  width: 100%;
+  height: 6px;
+  background: $background-third;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: $brand-primary;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
 .spinner {
   width: 24px;
   height: 24px;

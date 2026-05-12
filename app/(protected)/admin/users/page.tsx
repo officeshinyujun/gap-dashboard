@@ -6,10 +6,8 @@ import { VStack } from '@/components/general/VStack';
 import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAccessToken } from '@/lib/auth';
+import { getAccessToken, API_BASE_URL } from '@/lib/auth';
 import s from './page.module.scss';
-
-const API_BASE = 'http://localhost:3001';
 
 interface AdminUser {
   id: string;
@@ -19,19 +17,23 @@ interface AdminUser {
   createdAt: string;
 }
 
+type ConfirmAction = { type: 'delete'; user: AdminUser };
+
 export default function AdminUsersPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState<ConfirmAction | null>(null);
+  const [processing, setProcessing] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const token = getAccessToken();
-      const res = await fetch(`${API_BASE}/admin/users`, {
+      const res = await fetch(`${API_BASE_URL}/admin/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('유저 목록 조회 실패');
@@ -49,6 +51,25 @@ export default function AdminUsersPage() {
       void fetchUsers();
     }
   }, [isLoading, user, router, fetchUsers]);
+
+  async function handleConfirm() {
+    if (!confirm) return;
+    setProcessing(true);
+    try {
+      const token = getAccessToken();
+      const res = await fetch(`${API_BASE_URL}/admin/users/${confirm.user.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('삭제 실패');
+      setUsers((prev) => prev.filter((u) => u.id !== confirm.user.id));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '처리 실패');
+    } finally {
+      setProcessing(false);
+      setConfirm(null);
+    }
+  }
 
   if (isLoading || loading) return (
     <VStack gap={16} align="center" justify="center" fullWidth fullHeight>
@@ -76,6 +97,7 @@ export default function AdminUsersPage() {
               <th className={s.th}>이메일</th>
               <th className={s.th}>역할</th>
               <th className={s.th}>가입일</th>
+              <th className={s.th}>관리</th>
             </tr>
           </thead>
           <tbody>
@@ -87,11 +109,46 @@ export default function AdminUsersPage() {
                   <span className={u.role === 'admin' ? s.badgeAdmin : s.badgeUser}>{u.role}</span>
                 </td>
                 <td className={s.tdMeta}>{new Date(u.createdAt).toLocaleDateString('ko-KR')}</td>
+                <td className={s.td}>
+                  <HStack gap={6}>
+                    <button
+                      className={`${s.actionBtn} ${s.btnDelete}`}
+                      onClick={() => setConfirm({ type: 'delete', user: u })}
+                    >
+                      삭제
+                    </button>
+                  </HStack>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* 확인 모달 */}
+      {confirm && (
+        <div className={s.confirmOverlay} onClick={() => setConfirm(null)}>
+          <div className={s.confirmModal} onClick={(e) => e.stopPropagation()}>
+            <VStack gap={8}>
+              <Typo.BD size={16} color="primary">유저 삭제</Typo.BD>
+              <Typo.MD size={12} color="secondary">
+                <strong>{confirm.user.name}</strong> ({confirm.user.email}) 유저를 삭제하시겠습니까?<br />
+                이 작업은 되돌릴 수 없습니다.
+              </Typo.MD>
+            </VStack>
+            <div className={s.confirmButtons}>
+              <button className={s.btnCancel} onClick={() => setConfirm(null)}>취소</button>
+              <button
+                className={s.btnConfirmDelete}
+                onClick={handleConfirm}
+                disabled={processing}
+              >
+                {processing ? '처리 중...' : confirm.type === 'delete' ? '삭제' : '변경'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </VStack>
   );
 }

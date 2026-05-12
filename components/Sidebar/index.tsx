@@ -5,7 +5,7 @@ import { HStack } from '../general/HStack';
 import Typo from '../general/Typo';
 import { SPACING } from '../../constants/spacing';
 import s from './style.module.scss';
-import { LayoutDashboard, FlaskConical, List, BookOpen, Settings, Users, BarChart2, Zap, LogOut, MessageSquare, BookMarked, Database } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, Users, BarChart2, Zap, LogOut, MessageSquare, BookMarked, Database } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -55,9 +55,6 @@ export function Sidebar() {
         <VStack gap={SPACING.s8} style={{ padding: SPACING.s8 }}>
           <Typo.MD size={12} color="secondary">시험 도구</Typo.MD>
           <SidebarItem icon={FlaskConical} label="시험 생성" href="/exam-generate" isActive={isActive('/exam-generate')} />
-          <SidebarItem icon={List} label="시험 목록" href="/exam-list" isActive={isActive('/exam-list')} />
-          <SidebarItem icon={BookOpen} label="시험지 뷰어" href="/exam-viewer" isActive={isActive('/exam-viewer')} />
-          <SidebarItem icon={Settings} label="QuestionStem 갤러리" href="/questionstem" isActive={isActive('/questionstem')} />
           <SidebarItem icon={BookMarked} label="Study Quiz 테스트" href="/study-quiz" isActive={isActive('/study-quiz')} />
           <SidebarItem icon={Database} label="RAG 임베딩 관리" href="/rag-embedding" isActive={isActive('/rag-embedding')} />
         </VStack>
@@ -73,8 +70,9 @@ export function Sidebar() {
           <VStack gap={SPACING.s8} style={{ padding: SPACING.s8 }}>
             <Typo.MD size={12} color="secondary">어드민</Typo.MD>
             <SidebarItem icon={Users} label="유저 목록" href="/admin/users" isActive={isActive('/admin/users')} />
-            <SidebarItem icon={BarChart2} label="문제 리스트" href="/admin/questions" isActive={isActive('/admin/questions')} />
+            <SidebarItem icon={BarChart2} label="시험 관리" href="/admin/questions" isActive={isActive('/admin/questions')} />
             <SidebarItem icon={Zap} label="API 사용량" href="/admin/usage" isActive={isActive('/admin/usage')} />
+            <SidebarItem icon={BarChart2} label="학습 진척도" href="/admin/progress" isActive={isActive('/admin/progress')} />
           </VStack>
         )}
       </VStack>
