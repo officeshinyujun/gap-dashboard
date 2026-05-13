@@ -148,6 +148,13 @@
   &:hover:not(:disabled) { background: $brand-secondary; }
 }
 
+.btnReset {
+  color: $text-secondary;
+  border-color: $text-secondary;
+  background: transparent;
+  &:hover:not(:disabled) { background: $background-third; }
+}
+
 .btnDelete {
   color: $text-wrong;
   border-color: $text-wrong;

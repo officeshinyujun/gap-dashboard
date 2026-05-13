@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { setTokens, removeTokens, getAccessToken, API_BASE_URL } from '@/lib/auth';
+import { setAccessToken, removeAccessToken, getAccessToken, API_BASE_URL } from '@/lib/auth';
 
 interface User {
   id: string;
@@ -26,14 +26,12 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  // 토큰이 있으면 초기 로딩 상태를 true로, 없으면 false로 즉시 설정
   const [isLoading, setIsLoading] = useState(() => {
     if (typeof window === 'undefined') return false;
     return !!localStorage.getItem('gap_access_token');
   });
   const router = useRouter();
 
-  // 앱 초기화 시 토큰으로 유저 정보 조회
   useEffect(() => {
     const token = getAccessToken();
     if (!token) {
@@ -47,7 +45,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) setUser(data);
-        // API 실패해도 토큰은 유지 (백엔드 일시 오류 대응)
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
@@ -57,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
 
@@ -66,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const data = await res.json();
-    setTokens(data.accessToken, data.refreshToken);
+    setAccessToken(data.accessToken);
     setUser(data.user);
     router.replace('/');
   }, [router]);
@@ -75,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const res = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ email, name, password }),
     });
 
@@ -84,13 +83,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const data = await res.json();
-    setTokens(data.accessToken, data.refreshToken);
+    setAccessToken(data.accessToken);
     setUser(data.user);
     router.replace('/');
   }, [router]);
 
-  const logout = useCallback(() => {
-    removeTokens();
+  const logout = useCallback(async () => {
+    try {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {}
+    removeAccessToken();
     setUser(null);
     router.replace('/landing');
   }, [router]);

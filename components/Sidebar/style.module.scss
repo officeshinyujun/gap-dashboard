@@ -2,6 +2,13 @@
   height: 100%;
   width: 250px;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.menuArea {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .gapLogo {

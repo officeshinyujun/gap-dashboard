@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { VStack } from '@/components/general/VStack';
 import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { useAuth } from '@/contexts/AuthContext';
 import { getAccessToken } from '@/lib/auth';
+import { SPACING } from '@/constants/spacing';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import s from './page.module.scss';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:3001';
@@ -95,6 +97,36 @@ export default function AdminUsagePage() {
     }
   }, [isLoading, user, router, fetchUsage]);
 
+  const dailyData = useMemo(() => {
+    // 항상 최근 7일 표시 (데이터 없는 날도 0으로)
+    const byDate = new Map<string, number>();
+    if (usage?.db) {
+      for (const row of usage.db) {
+        byDate.set(row.date, (byDate.get(row.date) ?? 0) + row.totalTokens);
+      }
+    }
+    const result = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      result.push({ date: dateStr.slice(5), tokens: byDate.get(dateStr) ?? 0 });
+    }
+    return result;
+  }, [usage]);
+
+  const sourceData = useMemo(() => {
+    if (!usage?.db) return [];
+    const bySource = new Map<string, number>();
+    for (const row of usage.db) {
+      const label = SOURCE_LABEL[row.source] ?? row.source;
+      bySource.set(label, (bySource.get(label) ?? 0) + row.totalTokens);
+    }
+    return [...bySource.entries()].map(([name, value]) => ({ name, value }));
+  }, [usage]);
+
+  const COLORS = ['#3333CC', '#5555CC', '#7777CC', '#9999CC', '#BBBBCC', '#DDDDEE'];
+
   if (isLoading || loading) return (
     <VStack gap={16} align="center" justify="center" fullWidth fullHeight>
       <div className={s.spinner} />
@@ -157,6 +189,36 @@ export default function AdminUsagePage() {
           <Typo.BD size={24} color="primary">{dbTotal.totalTokens.toLocaleString()}</Typo.BD>
         </div>
       </HStack>
+
+      {usage && usage.db.length > 0 && (
+        <HStack gap={SPACING.s16} fullWidth style={{ height: 250 }}>
+          <VStack gap={SPACING.s8} style={{ flex: 1 }}>
+            <Typo.MD size={14} color="primary">일별 토큰 사용량</Typo.MD>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={dailyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E2E9" />
+                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip />
+                <Bar dataKey="tokens" fill="#3333CC" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </VStack>
+
+          <VStack gap={SPACING.s8} style={{ flex: 1 }}>
+            <Typo.MD size={14} color="primary">소스별 분포</Typo.MD>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={sourceData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E2E9" />
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Bar dataKey="value" fill="#3333CC" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </VStack>
+        </HStack>
+      )}
 
       {/* 탭 */}
       <VStack gap={0} fullWidth>

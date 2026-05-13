@@ -37,12 +37,9 @@
 
 .examItem {
   width: 100%;
-  padding: $spacing-12 $spacing-14;
   background: none;
   border: none;
   border-bottom: 1px solid $border-primary;
-  cursor: pointer;
-  text-align: left;
   transition: background-color 0.1s;
   box-sizing: border-box;
 
@@ -183,4 +180,76 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+.filterTabs {
+  border-bottom: 1px solid $border-primary;
+  flex-shrink: 0;
+}
+
+.filterTab {
+  flex: 1;
+  padding: $spacing-8 $spacing-6;
+  font-size: 11px;
+  font-weight: $medium;
+  font-family: 'Noto Sans KR', 'Noto Sans', sans-serif;
+  color: $text-secondary;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+
+  &:hover {
+    color: $text-primary;
+  }
+}
+
+.filterTabActive {
+  color: $brand-primary;
+  border-bottom-color: $brand-primary;
+  font-weight: $semi-bold;
+}
+
+.bulkBar {
+  padding: $spacing-6 $spacing-12;
+  background-color: $background-secondary;
+  border-bottom: 1px solid $border-primary;
+  flex-shrink: 0;
+}
+
+.examCheckbox {
+  flex-shrink: 0;
+  margin: 0 $spacing-8 0 $spacing-12;
+  cursor: pointer;
+  accent-color: $brand-primary;
+}
+
+.examItemContent {
+  flex: 1;
+  min-width: 0;
+  padding: $spacing-12 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.deleteBtn {
+  flex-shrink: 0;
+  padding: $spacing-4 $spacing-8;
+  font-size: 11px;
+  font-weight: $medium;
+  font-family: 'Noto Sans KR', 'Noto Sans', sans-serif;
+  color: $text-wrong;
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.1s, border-color 0.1s;
+  margin-right: $spacing-8;
+
+  &:hover {
+    background-color: $background-secondary;
+    border-color: $text-wrong;
+  }
 }

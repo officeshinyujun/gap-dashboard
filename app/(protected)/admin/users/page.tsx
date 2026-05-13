@@ -52,6 +52,40 @@ export default function AdminUsersPage() {
     }
   }, [isLoading, user, router, fetchUsers]);
 
+  async function handleRoleChange(userId: string, currentRole: string) {
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    if (!window.confirm(`역할을 ${newRole}로 변경하시겠습니까?`)) return;
+    try {
+      const token = getAccessToken();
+      const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/role`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole }),
+      });
+      if (!res.ok) throw new Error('역할 변경 실패');
+      setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '역할 변경 실패');
+    }
+  }
+
+  async function handlePasswordReset(userId: string) {
+    const newPw = prompt('새 비밀번호를 입력하세요 (8자 이상):');
+    if (!newPw || newPw.length < 8) { alert('8자 이상 입력해주세요.'); return; }
+    try {
+      const token = getAccessToken();
+      const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/password`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword: newPw }),
+      });
+      if (!res.ok) throw new Error('비밀번호 초기화 실패');
+      alert('비밀번호가 초기화되었습니다.');
+    } catch (e) {
+      alert(e instanceof Error ? e.message : '초기화 실패');
+    }
+  }
+
   async function handleConfirm() {
     if (!confirm) return;
     setProcessing(true);
@@ -111,6 +145,18 @@ export default function AdminUsersPage() {
                 <td className={s.tdMeta}>{new Date(u.createdAt).toLocaleDateString('ko-KR')}</td>
                 <td className={s.td}>
                   <HStack gap={6}>
+                    <button
+                      className={`${s.actionBtn} ${s.btnRole}`}
+                      onClick={() => handleRoleChange(u.id, u.role)}
+                    >
+                      {u.role === 'admin' ? '→ user' : '→ admin'}
+                    </button>
+                    <button
+                      className={`${s.actionBtn} ${s.btnReset}`}
+                      onClick={() => handlePasswordReset(u.id)}
+                    >
+                      PW 초기화
+                    </button>
                     <button
                       className={`${s.actionBtn} ${s.btnDelete}`}
                       onClick={() => setConfirm({ type: 'delete', user: u })}
