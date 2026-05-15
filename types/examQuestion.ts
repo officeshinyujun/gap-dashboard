@@ -124,9 +124,17 @@ export function getExplanationText(explanation: ExamExplanation): string {
   if (typeof explanation === 'string') return explanation;
   if ('correct_answer' in explanation) return explanation.correct_answer;
   if ('judgment' in explanation) {
-    const { judgment, ...distractors } = explanation;
-    const distractorText = Object.values(distractors).join('\n');
-    return distractorText ? `${judgment}\n\n${distractorText}` : judgment;
+    const judgment = explanation.judgment ?? '';
+    const distractors = (explanation as any).distractors;
+    if (distractors && typeof distractors === 'object') {
+      const distractorEntries = Object.entries(distractors)
+        .map(([key, val]) => `${key}번: ${val}`)
+        .join('\n');
+      return distractorEntries ? `${judgment}\n\n[오답 해설]\n${distractorEntries}` : judgment;
+    }
+    const { judgment: _, ...rest } = explanation;
+    const restText = Object.values(rest).filter((v) => typeof v === 'string').join('\n');
+    return restText ? `${judgment}\n\n${restText}` : judgment;
   }
   return '';
 }
