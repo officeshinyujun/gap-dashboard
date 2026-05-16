@@ -9,7 +9,7 @@ import { BlankQuiz } from '@/components/study/BlankQuiz';
 import { ConceptQuiz } from '@/components/study/ConceptQuiz';
 import { QuestionRenderer } from '@/components/exam/QuestionStem/QuestionRenderer';
 import { fetchBlankQuestions, fetchConceptPairs, clearStudyQuizCache } from '@/lib/studyQuizApi';
-import { API_BASE_URL, getAccessToken } from '@/lib/auth';
+import { API_BASE_URL } from '@/lib/auth';
 import type { BlankQuestion, ConceptPair, QuizCount } from '@/types/studyQuiz';
 import type { ExamQuestion } from '@/types/examQuestion';
 import s from './page.module.scss';
@@ -109,12 +109,11 @@ export default function StudyQuizPage() {
         setPageState('quiz');
       } else {
         // exam: subjectId 조회 → job 생성 → 폴링
-        const token = getAccessToken();
         setPollMsg('과목 정보를 불러오는 중...');
         setPollProgress(0);
 
         const subjectRes = await fetch(`${API_BASE_URL}/subjects/${subject}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: 'include',
         });
         if (!subjectRes.ok) throw new Error('과목 정보 조회 실패');
         const subjectInfo = await subjectRes.json();
@@ -122,7 +121,8 @@ export default function StudyQuizPage() {
         setPollMsg('시험을 생성하는 중...');
         const jobRes = await fetch(`${API_BASE_URL}/exams/jobs`, {
           method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             subjectId: subjectInfo.id,
             startUnitNum: unit,
@@ -137,7 +137,7 @@ export default function StudyQuizPage() {
         // 폴링
         const poll = async (): Promise<void> => {
           const pollRes = await fetch(`${API_BASE_URL}/exams/jobs/${jobId}`, {
-            headers: { Authorization: `Bearer ${token}` },
+            credentials: 'include',
           });
           const job = await pollRes.json();
           setPollProgress(job.progress ?? 0);
@@ -145,7 +145,7 @@ export default function StudyQuizPage() {
 
           if (job.status === 'completed' && job.examId) {
             const examRes = await fetch(`${API_BASE_URL}/exams/${job.examId}`, {
-              headers: { Authorization: `Bearer ${token}` },
+              credentials: 'include',
             });
             const examData = await examRes.json();
             const items: ExamItem[] = (examData.items ?? []).map((item: Record<string, unknown>) => ({
@@ -174,14 +174,14 @@ export default function StudyQuizPage() {
   async function handleExamSubmit() {
     if (!examId) return;
     try {
-      const token = getAccessToken();
       await fetch(`${API_BASE_URL}/exams/${examId}/submit`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ answers: examAnswers }),
       });
       const resultRes = await fetch(`${API_BASE_URL}/exams/${examId}/result`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       const result = await resultRes.json();
       setCorrectCount(result.correctCount ?? 0);

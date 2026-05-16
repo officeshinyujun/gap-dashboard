@@ -6,7 +6,7 @@ import { VStack } from '@/components/general/VStack';
 import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAccessToken, API_BASE_URL } from '@/lib/auth';
+import { API_BASE_URL } from '@/lib/auth';
 import s from './page.module.scss';
 
 interface AdminUser {
@@ -32,9 +32,8 @@ export default function AdminUsersPage() {
     setLoading(true);
     setError(null);
     try {
-      const token = getAccessToken();
       const res = await fetch(`${API_BASE_URL}/admin/users`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (!res.ok) throw new Error('유저 목록 조회 실패');
       setUsers(await res.json());
@@ -56,10 +55,10 @@ export default function AdminUsersPage() {
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
     if (!window.confirm(`역할을 ${newRole}로 변경하시겠습니까?`)) return;
     try {
-      const token = getAccessToken();
       const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/role`, {
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: newRole }),
       });
       if (!res.ok) throw new Error('역할 변경 실패');
@@ -73,10 +72,10 @@ export default function AdminUsersPage() {
     const newPw = prompt('새 비밀번호를 입력하세요 (8자 이상):');
     if (!newPw || newPw.length < 8) { alert('8자 이상 입력해주세요.'); return; }
     try {
-      const token = getAccessToken();
       const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/password`, {
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newPassword: newPw }),
       });
       if (!res.ok) throw new Error('비밀번호 초기화 실패');
@@ -90,10 +89,9 @@ export default function AdminUsersPage() {
     if (!confirm) return;
     setProcessing(true);
     try {
-      const token = getAccessToken();
       const res = await fetch(`${API_BASE_URL}/admin/users/${confirm.user.id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (!res.ok) throw new Error('삭제 실패');
       setUsers((prev) => prev.filter((u) => u.id !== confirm.user.id));

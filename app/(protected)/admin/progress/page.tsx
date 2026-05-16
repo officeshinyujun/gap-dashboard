@@ -6,7 +6,7 @@ import { VStack } from '@/components/general/VStack';
 import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAccessToken, API_BASE_URL } from '@/lib/auth';
+import { API_BASE_URL } from '@/lib/auth';
 import s from './page.module.scss';
 
 interface UserProgressSummary {
@@ -52,9 +52,8 @@ export default function AdminProgressPage() {
     setLoading(true);
     setError(null);
     try {
-      const token = getAccessToken();
       const res = await fetch(`${API_BASE_URL}/admin/progress`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (!res.ok) throw new Error('진척도 목록 조회 실패');
       setUsers(await res.json());
@@ -76,9 +75,8 @@ export default function AdminProgressPage() {
     setSelectedUserId(userId);
     setDetailLoading(true);
     try {
-      const token = getAccessToken();
       const res = await fetch(`${API_BASE_URL}/admin/progress/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (!res.ok) throw new Error('상세 조회 실패');
       const data = await res.json();
@@ -94,10 +92,9 @@ export default function AdminProgressPage() {
     if (!confirmReset) return;
     setResetting(true);
     try {
-      const token = getAccessToken();
       const res = await fetch(`${API_BASE_URL}/admin/progress/${confirmReset.id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (!res.ok) throw new Error('초기화 실패');
       setUsers((prev) => prev.map((u) =>

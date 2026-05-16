@@ -19,7 +19,7 @@ export interface TPLConversationalFlowProps {
  */
 export const TPLConversationalFlow: React.FC<TPLConversationalFlowProps> = ({
   data,
-  label = '다음 대화를 읽고 물음에 답하시오.',
+  label,
 }) => {
   const participantMap = useMemo(() => {
     const map = new Map<string, { name: string; role: string }>();

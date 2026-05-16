@@ -5,7 +5,7 @@ import { VStack } from '@/components/general/VStack';
 import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { SPACING } from '@/constants/spacing';
-import { API_BASE_URL, getAccessToken } from '@/lib/auth';
+import { API_BASE_URL } from '@/lib/auth';
 import s from './page.module.scss';
 
 const SUBJECTS = [
@@ -19,12 +19,11 @@ interface EmbeddingStatus {
 }
 
 async function apiFetch<T>(path: string, method = 'GET'): Promise<T> {
-  const token = getAccessToken();
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method,
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
   if (!res.ok) {

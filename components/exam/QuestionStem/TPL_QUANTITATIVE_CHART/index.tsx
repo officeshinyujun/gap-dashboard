@@ -14,7 +14,7 @@ export interface TPLQuantitativeChartProps {
 
 export const TPLQuantitativeChart: React.FC<TPLQuantitativeChartProps> = ({
   data,
-  label = '다음 자료를 보고 물음에 답하시오.',
+  label,
 }) => {
   return (
     <StemBox>

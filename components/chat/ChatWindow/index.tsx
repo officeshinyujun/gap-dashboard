@@ -5,7 +5,6 @@ import { VStack } from '@/components/general/VStack';
 import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { SPACING } from '@/constants/spacing';
-import { getAccessToken } from '@/lib/auth';
 import { ArrowUp } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -35,9 +34,8 @@ export function ChatWindow({ sessionId, sessionTitle }: ChatWindowProps) {
   // 세션 메시지 로드
   useEffect(() => {
     setFetching(true);
-    const token = getAccessToken();
     fetch(`${API_URL}/chat/sessions/${sessionId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
     })
       .then((r) => r.json())
       .then((data) => {
@@ -68,12 +66,11 @@ export function ChatWindow({ sessionId, sessionTitle }: ChatWindowProps) {
     setMessages((prev) => [...prev, tempUserMsg]);
 
     try {
-      const token = getAccessToken();
       const res = await fetch(`${API_URL}/chat/sessions/${sessionId}/messages`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ message: text }),
       });

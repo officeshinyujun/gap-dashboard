@@ -6,7 +6,6 @@ import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { QuestionRenderer } from '@/components/exam/QuestionStem/QuestionRenderer';
 import { getTemplateLabel } from '@/utils/examParser';
-import { getAccessToken } from '@/lib/auth';
 import type { ExamQuestion } from '@/types/examQuestion';
 import s from './page.module.scss';
 
@@ -108,12 +107,6 @@ export default function DevExamGeneratePage() {
   const pollingStartRef = useRef<number | null>(null);
   const POLLING_TIMEOUT_MS = 5 * 60 * 1000; // 5분
 
-  const getToken = () => {
-    const token = getAccessToken();
-    if (!token) throw new Error('로그인이 필요합니다.');
-    return token;
-  };
-
   const resetConcepts = () => {
     setConcepts([]);
     setSelectedConcepts([]);
@@ -127,9 +120,9 @@ export default function DevExamGeneratePage() {
   });
 
   const loadExamResult = useEffectEvent(
-    async (examId: string, token: string, subjectTitleFallback: string) => {
+    async (examId: string, subjectTitleFallback: string) => {
       const examRes = await fetch(`${API_BASE}/exams/${examId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
 
       if (!examRes.ok) {
@@ -148,9 +141,9 @@ export default function DevExamGeneratePage() {
   );
 
   const pollJob = useEffectEvent(
-    async (jobId: string, token: string, subjectTitleFallback: string) => {
+    async (jobId: string, subjectTitleFallback: string) => {
       const jobRes = await fetch(`${API_BASE}/exams/jobs/${jobId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
 
       if (!jobRes.ok) {
@@ -163,7 +156,7 @@ export default function DevExamGeneratePage() {
 
       if (job.status === 'completed' && job.examId) {
         stopPolling();
-        await loadExamResult(job.examId, token, subjectTitleFallback);
+        await loadExamResult(job.examId, subjectTitleFallback);
         setLoading(false);
       }
 
@@ -217,11 +210,9 @@ export default function DevExamGeneratePage() {
     setJobState(null);
 
     try {
-      const token = getToken();
-
       // 1. subjectId 조회
       const subjectsRes = await fetch(`${API_BASE}/subjects`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (!subjectsRes.ok) throw new Error('과목 목록 조회 실패');
       const subjects: { id: string; slug: string; title: string }[] = await subjectsRes.json();
@@ -231,9 +222,9 @@ export default function DevExamGeneratePage() {
       // 2. 생성 job 시작
       const createRes = await fetch(`${API_BASE}/exams/jobs`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           subjectId: subject.id,
@@ -276,7 +267,7 @@ export default function DevExamGeneratePage() {
         ],
       });
 
-      const initialJob = await pollJob(data.jobId, token, subject.title);
+      const initialJob = await pollJob(data.jobId, subject.title);
 
       if (!initialJob || initialJob.status === 'completed' || initialJob.status === 'failed') {
         return;
@@ -293,7 +284,7 @@ export default function DevExamGeneratePage() {
           return;
         }
 
-        void pollJob(data.jobId, token, subject.title).catch((pollError: unknown) => {
+        void pollJob(data.jobId, subject.title).catch((pollError: unknown) => {
           stopPolling();
           setLoading(false);
           setError(

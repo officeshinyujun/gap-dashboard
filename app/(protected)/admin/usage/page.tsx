@@ -6,7 +6,6 @@ import { VStack } from '@/components/general/VStack';
 import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAccessToken } from '@/lib/auth';
 import { SPACING } from '@/constants/spacing';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import s from './page.module.scss';
@@ -77,9 +76,8 @@ export default function AdminUsagePage() {
     setLoading(true);
     setError(null);
     try {
-      const token = getAccessToken();
       const res = await fetch(`${API_BASE}/admin/openai-usage`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (!res.ok) throw new Error('사용량 조회 실패');
       setUsage(await res.json());

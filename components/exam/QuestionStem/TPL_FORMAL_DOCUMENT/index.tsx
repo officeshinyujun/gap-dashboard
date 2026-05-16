@@ -13,7 +13,7 @@ export interface TPLFormalDocumentProps {
 
 export const TPLFormalDocument: React.FC<TPLFormalDocumentProps> = ({
   data,
-  label = '다음 글을 읽고 물음에 답하시오.',
+  label,
 }) => {
   return (
     <StemBox>

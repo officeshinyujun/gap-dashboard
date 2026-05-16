@@ -5,7 +5,7 @@ import { VStack } from '@/components/general/VStack';
 import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { SPACING } from '@/constants/spacing';
-import { API_BASE_URL, getAccessToken } from '@/lib/auth';
+import { API_BASE_URL } from '@/lib/auth';
 import s from './page.module.scss';
 
 const API_BASE = API_BASE_URL;
@@ -48,9 +48,8 @@ export default function AdminQuestionsPage() {
   const [difficulty, setDifficulty] = useState('');
 
   const fetchStats = useCallback(async () => {
-    const token = getAccessToken();
     const res = await fetch(`${API_BASE}/admin/questions/stats`, {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
     });
     if (res.ok) {
       setStats(await res.json());
@@ -59,7 +58,6 @@ export default function AdminQuestionsPage() {
 
   const fetchQuestions = useCallback(async (newOffset = 0) => {
     setLoading(true);
-    const token = getAccessToken();
     const params = new URLSearchParams();
     if (subjectSlug) params.set('subjectSlug', subjectSlug);
     if (unitNumber) params.set('unitNumber', unitNumber);
@@ -68,7 +66,7 @@ export default function AdminQuestionsPage() {
     params.set('offset', String(newOffset));
 
     const res = await fetch(`${API_BASE}/admin/questions?${params}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
     });
     if (res.ok) {
       const data = await res.json();
@@ -90,10 +88,9 @@ export default function AdminQuestionsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
-    const token = getAccessToken();
     const res = await fetch(`${API_BASE}/admin/questions/${id}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
     });
     if (res.ok) {
       fetchQuestions(offset);

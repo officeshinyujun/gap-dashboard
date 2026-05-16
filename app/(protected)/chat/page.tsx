@@ -5,7 +5,6 @@ import { VStack } from '@/components/general/VStack';
 import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { SPACING } from '@/constants/spacing';
-import { getAccessToken } from '@/lib/auth';
 import { CreateChatModal } from '@/components/chat/CreateChatModal';
 import { ChatWindow } from '@/components/chat/ChatWindow';
 import { Plus, MessageSquare, Trash2 } from 'lucide-react';
@@ -29,9 +28,8 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true);
 
   const fetchSessions = async () => {
-    const token = getAccessToken();
     const res = await fetch(`${API_URL}/chat/sessions`, {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
     });
     if (res.ok) {
       const data = await res.json();
@@ -51,10 +49,9 @@ export default function ChatPage() {
 
   const handleDelete = async (e: React.MouseEvent, sessionId: string) => {
     e.stopPropagation();
-    const token = getAccessToken();
     await fetch(`${API_URL}/chat/sessions/${sessionId}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
     });
     setSessions((prev) => prev.filter((s) => s.id !== sessionId));
     if (selectedId === sessionId) setSelectedId(null);

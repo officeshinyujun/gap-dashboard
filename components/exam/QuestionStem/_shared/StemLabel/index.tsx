@@ -13,6 +13,7 @@ export interface StemLabelProps {
  * 지문 상단에 위치하는 안내 텍스트입니다.
  */
 export const StemLabel: React.FC<StemLabelProps> = ({ children, className }) => {
+  if (!children) return null;
   return (
     <p className={cs(s.stemLabel, className)}>
       {children}

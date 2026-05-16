@@ -5,7 +5,6 @@ import { VStack } from '@/components/general/VStack';
 import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { SPACING } from '@/constants/spacing';
-import { getAccessToken } from '@/lib/auth';
 import s from './style.module.scss';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -33,9 +32,8 @@ export function CreateChatModal({ isOpen, onClose, onCreated }: CreateChatModalP
 
   useEffect(() => {
     if (!isOpen) return;
-    const token = getAccessToken();
     fetch(`${API_URL}/subjects`, {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
     })
       .then((r) => r.json())
       .then((data) => {
@@ -54,12 +52,11 @@ export function CreateChatModal({ isOpen, onClose, onCreated }: CreateChatModalP
     setLoading(true);
     setError('');
     try {
-      const token = getAccessToken();
       const res = await fetch(`${API_URL}/chat/sessions`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ subjectId, title: title.trim(), startUnit, endUnit }),
       });

@@ -22,7 +22,7 @@ export interface TPLInstructionalSceneProps {
  */
 export const TPLInstructionalScene: React.FC<TPLInstructionalSceneProps> = ({
   data,
-  label = '다음은 수업 장면의 일부이다. 물음에 답하시오.',
+  label,
 }) => {
   return (
     <StemBox>

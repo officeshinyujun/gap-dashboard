@@ -21,7 +21,7 @@ export interface TPLComparativeMatrixProps {
  */
 export const TPLComparativeMatrix: React.FC<TPLComparativeMatrixProps> = ({
   data,
-  label = '다음 표를 보고 물음에 답하시오.',
+  label,
 }) => {
   return (
     <StemBox>

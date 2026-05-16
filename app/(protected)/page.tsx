@@ -7,7 +7,7 @@ import { VStack } from '@/components/general/VStack';
 import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { SPACING } from '@/constants/spacing';
-import { API_BASE_URL, getAccessToken } from '@/lib/auth';
+import { API_BASE_URL } from '@/lib/auth';
 import s from './page.module.scss';
 
 interface Stats {
@@ -35,15 +35,13 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = getAccessToken();
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
 
     Promise.allSettled([
-      fetch(`${API_BASE_URL}/admin/users`, { headers }).then(r => r.json()),
-      fetch(`${API_BASE_URL}/exams`, { headers }).then(r => r.json()),
-      fetch(`${API_BASE_URL}/study/cache-status`, { headers }).then(r => r.json()),
-      fetch(`${API_BASE_URL}/admin/openai-usage`, { headers }).then(r => r.json()),
+      fetch(`${API_BASE_URL}/admin/users`, { headers, credentials: 'include' }).then(r => r.json()),
+      fetch(`${API_BASE_URL}/exams`, { headers, credentials: 'include' }).then(r => r.json()),
+      fetch(`${API_BASE_URL}/study/cache-status`, { headers, credentials: 'include' }).then(r => r.json()),
+      fetch(`${API_BASE_URL}/admin/openai-usage`, { headers, credentials: 'include' }).then(r => r.json()),
     ]).then(([usersRes, examsRes, cacheRes, usageRes]) => {
       const userCount = usersRes.status === 'fulfilled' && Array.isArray(usersRes.value) ? usersRes.value.length : 0;
       const examCount = examsRes.status === 'fulfilled' && Array.isArray(examsRes.value) ? examsRes.value.length : 0;

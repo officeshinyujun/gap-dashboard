@@ -22,7 +22,7 @@ export interface TPLDigitalForumInterfaceProps {
  */
 export const TPLDigitalForumInterface: React.FC<TPLDigitalForumInterfaceProps> = ({
   data,
-  label = '다음 인터넷 게시판의 글을 읽고 물음에 답하시오.',
+  label,
 }) => {
   return (
     <StemBox>

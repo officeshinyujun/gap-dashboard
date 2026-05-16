@@ -6,7 +6,6 @@ import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { QuestionRenderer } from '@/components/exam/QuestionStem/QuestionRenderer';
 import { getTemplateLabel } from '@/utils/examParser';
-import { getAccessToken } from '@/lib/auth';
 import type { ExamQuestion } from '@/types/examQuestion';
 import s from './page.module.scss';
 
@@ -92,19 +91,12 @@ export default function DevExamListPage() {
   const [detailError, setDetailError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const getToken = () => {
-    const token = getAccessToken();
-    if (!token) throw new Error('로그인이 필요합니다.');
-    return token;
-  };
-
   const loadExams = useCallback(async () => {
     setLoadingList(true);
     setListError(null);
     try {
-      const token = getToken();
       const res = await fetch(`${API_BASE}/exams`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (!res.ok) throw new Error(`시험 목록 조회 실패 (${res.status})`);
       const data: ApiExamSummary[] = await res.json();
@@ -123,9 +115,8 @@ export default function DevExamListPage() {
     setCurrentIndex(0);
     setSelectedExamId(examId);
     try {
-      const token = getToken();
       const res = await fetch(`${API_BASE}/exams/${examId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (!res.ok) throw new Error(`시험 상세 조회 실패 (${res.status})`);
       const data = await res.json();
@@ -146,10 +137,9 @@ export default function DevExamListPage() {
   const handleDelete = async (examId: string) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
     try {
-      const token = getToken();
       const res = await fetch(`${API_BASE}/admin/exams/${examId}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (!res.ok) throw new Error(`삭제 실패 (${res.status})`);
       if (selectedExamId === examId) {
@@ -171,12 +161,11 @@ export default function DevExamListPage() {
     if (selectedIds.size === 0) return;
     if (!confirm(`${selectedIds.size}개 시험을 삭제하시겠습니까?`)) return;
     try {
-      const token = getToken();
       await Promise.all(
         Array.from(selectedIds).map((id) =>
           fetch(`${API_BASE}/admin/exams/${id}`, {
             method: 'DELETE',
-            headers: { Authorization: `Bearer ${token}` },
+            credentials: 'include',
           })
         )
       );

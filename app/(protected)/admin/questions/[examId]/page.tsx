@@ -8,7 +8,6 @@ import Typo from '@/components/general/Typo';
 import { QuestionRenderer } from '@/components/exam/QuestionStem/QuestionRenderer';
 import { getTemplateLabel } from '@/utils/examParser';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAccessToken } from '@/lib/auth';
 import type { ExamQuestion } from '@/types/examQuestion';
 import s from './page.module.scss';
 
@@ -71,9 +70,8 @@ export default function AdminQuestionDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const token = getAccessToken();
       const res = await fetch(`${API_BASE}/exams/${examId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (!res.ok) throw new Error(`시험 조회 실패 (${res.status})`);
       const data = await res.json();

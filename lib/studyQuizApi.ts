@@ -1,12 +1,11 @@
-import { API_BASE_URL, getAccessToken } from './auth';
+import { API_BASE_URL } from './auth';
 import type { BlankQuestion, ConceptPair, QuizCount } from '@/types/studyQuiz';
 
 async function apiFetch<T>(path: string): Promise<T> {
-  const token = getAccessToken();
   const res = await fetch(`${API_BASE_URL}${path}`, {
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
 
@@ -46,7 +45,6 @@ export async function clearStudyQuizCache(
   type?: 'blank' | 'concept',
   count?: QuizCount,
 ): Promise<void> {
-  const token = getAccessToken();
   const params = new URLSearchParams();
   if (type) params.set('type', type);
   if (count) params.set('count', String(count));
@@ -54,9 +52,9 @@ export async function clearStudyQuizCache(
 
   await fetch(`${API_BASE_URL}/study/${subjectSlug}/${unitNumber}/cache${query}`, {
     method: 'DELETE',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
 }

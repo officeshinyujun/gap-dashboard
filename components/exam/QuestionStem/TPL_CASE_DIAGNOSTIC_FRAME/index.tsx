@@ -14,7 +14,7 @@ export interface TPLCaseDiagnosticFrameProps {
 
 export const TPLCaseDiagnosticFrame: React.FC<TPLCaseDiagnosticFrameProps> = ({
   data,
-  label = '다음 사례를 읽고 물음에 답하시오.',
+  label,
 }) => {
   return (
     <StemBox>

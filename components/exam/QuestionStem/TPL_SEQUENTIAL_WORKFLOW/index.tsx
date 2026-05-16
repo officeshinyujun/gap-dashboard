@@ -22,7 +22,7 @@ export interface TPLSequentialWorkflowProps {
  */
 export const TPLSequentialWorkflow: React.FC<TPLSequentialWorkflowProps> = ({
   data,
-  label = '다음 순서도를 보고 물음에 답하시오.',
+  label,
 }) => {
   const isHorizontal = data.orientation === 'horizontal';
 

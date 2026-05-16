@@ -5,7 +5,7 @@ import { VStack } from '@/components/general/VStack';
 import { HStack } from '@/components/general/HStack';
 import Typo from '@/components/general/Typo';
 import { SPACING } from '@/constants/spacing';
-import { API_BASE_URL, getAccessToken } from '@/lib/auth';
+import { API_BASE_URL } from '@/lib/auth';
 import s from './page.module.scss';
 
 type CacheUnit = {
@@ -30,12 +30,12 @@ type RegenStatus = {
 };
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = getAccessToken();
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options?.headers ?? {}),
     },
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);

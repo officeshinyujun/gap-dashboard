@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { setAccessToken, removeAccessToken, getAccessToken, API_BASE_URL } from '@/lib/auth';
+import { API_BASE_URL } from '@/lib/auth';
 
 interface User {
   id: string;
@@ -26,21 +26,12 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return !!localStorage.getItem('gap_access_token');
-  });
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const token = getAccessToken();
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
-
     fetch(`${API_BASE_URL}/users/me`, {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -64,7 +55,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const data = await res.json();
-    setAccessToken(data.accessToken);
     setUser(data.user);
     router.replace('/');
   }, [router]);
@@ -83,7 +73,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const data = await res.json();
-    setAccessToken(data.accessToken);
     setUser(data.user);
     router.replace('/');
   }, [router]);
@@ -95,7 +84,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         credentials: 'include',
       });
     } catch {}
-    removeAccessToken();
     setUser(null);
     router.replace('/landing');
   }, [router]);

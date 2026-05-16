@@ -24,26 +24,15 @@ export interface TPLPromotionalCanvasProps {
  */
 export const TPLPromotionalCanvas: React.FC<TPLPromotionalCanvasProps> = ({
   data,
-  label = '다음 광고를 읽고 물음에 답하시오.',
+  label,
 }) => {
   return (
     <StemBox variant="bordered">
       <VStack gap={16} fullWidth>
         <StemLabel>{label}</StemLabel>
 
-        {/* 슬로건 */}
         <PromoSlogan text={data.slogan} />
 
-        {/* 시각 요소 태그들 */}
-        {data.visual_elements.length > 0 && (
-          <HStack gap={8} wrap="wrap" justify="center" fullWidth>
-            {data.visual_elements.map((el, index) => (
-              <PromoVisualTag key={index} label={el} />
-            ))}
-          </HStack>
-        )}
-
-        {/* 불릿 목록 */}
         {data.bullets.length > 0 && (
           <div className={s.bulletSection}>
             <VStack gap={4} fullWidth>
@@ -54,7 +43,6 @@ export const TPLPromotionalCanvas: React.FC<TPLPromotionalCanvasProps> = ({
           </div>
         )}
 
-        {/* 빈칸 */}
         {data.missing_part && (
           <PromoMissingPart hint={data.missing_part} />
         )}
